@@ -1,26 +1,36 @@
+import 'dart:io'; // Import for File
 import 'package:blood_donation/screens/halaman_donasi_request.dart';
 import 'package:blood_donation/screens/halaman_stok_darah_screen.dart';
 import 'package:blood_donation/screens/pmi_location_screen.dart';
 import 'package:blood_donation/screens/permintaan_donor_screen.dart'; // import baru
 import 'package:blood_donation/screens/history_screen.dart'; // Import history_screen.dart
+import 'package:blood_donation/screens/profil_screen.dart'; // Import ProfilScreen
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
   final String userName;
   final String userBloodGroup;
-  final String userGender;
+  final String userGender; // Add gender
   final String userJob;
   final DateTime userBirthDate;
   final String userAddress;
+  final String userKtpNumber; // Add KTP number
+  final String userEmail; // Add Email
+  final String userPassword; // Add Password
+  final String userImagePath; // Add Image Path
 
   const HomeScreen({
     Key? key,
     required this.userName,
     required this.userBloodGroup,
-    required this.userGender,
+    required this.userGender, // Include gender
     required this.userJob,
     required this.userBirthDate,
     required this.userAddress,
+    required this.userKtpNumber, // Add KTP number
+    required this.userEmail, // Add Email
+    required this.userPassword, // Add Password
+    required this.userImagePath, // Add Image Path
   }) : super(key: key);
 
   @override
@@ -91,14 +101,35 @@ class HomeScreen extends StatelessWidget {
                                 color: Colors.white,
                               ),
                             ),
-                            CircleAvatar(
-                              backgroundColor: Colors.white24,
-                              child: IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.people_alt_rounded,
-                                  color: Colors.white,
-                                ),
+                            GestureDetector(
+                              onTap: () {
+                                // Navigate to ProfilScreen
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProfilScreen(
+                                      name: userName,
+                                      address: userAddress,
+                                      bloodGroup: userBloodGroup,
+                                      birthDate: userBirthDate,
+                                      job: userJob,
+                                      gender: userGender, // Pass gender here
+                                      ktpNumber: userKtpNumber,
+                                      email: userEmail,
+                                      password: userPassword,
+                                      imagePath: userImagePath,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: CircleAvatar(
+                                radius: 30, // Adjust the size as needed
+                                backgroundImage: userImagePath.isNotEmpty
+                                    ? FileImage(File(userImagePath))
+                                    : AssetImage('assets/images/default_profile.png') as ImageProvider,
+                                onBackgroundImageError: (error, stackTrace) {
+                                  // Handle error loading image if needed
+                                },
                               ),
                             ),
                           ],
@@ -176,11 +207,10 @@ class HomeScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder:
-                                  (context) => DonationRequestScreen(
-                                    userName: userName,
-                                    userBloodGroup: userBloodGroup,
-                                  ),
+                              builder: (context) => DonationRequestScreen(
+                                userName: userName,
+                                userBloodGroup: userBloodGroup,
+                              ),
                             ),
                           );
                         },
@@ -251,9 +281,7 @@ class HomeScreen extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder:
-                                    (context) =>
-                                        HistoryScreen(), // Navigasi ke HistoryScreen
+                                builder: (context) => HistoryScreen(),
                               ),
                             );
                           },
@@ -403,11 +431,10 @@ class HomeScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder:
-                  (context) => DonationRequestScreen(
-                    userName: userName,
-                    userBloodGroup: userBloodGroup,
-                  ),
+              builder: (context) => DonationRequestScreen(
+                userName: userName,
+                userBloodGroup: userBloodGroup,
+              ),
             ),
           );
         },
@@ -499,3 +526,4 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+

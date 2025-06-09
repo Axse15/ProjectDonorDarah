@@ -1,5 +1,7 @@
-import 'package:blood_donation/screens/halaman_login_screen.dart'; // Pastikan untuk mengimpor WelcomeScreen
+import 'package:blood_donation/screens/halaman_login_screen.dart'; // Import WelcomeScreen
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; // Import ImagePicker
+import 'dart:io'; // Import untuk File
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -19,6 +21,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   String? _selectedGender; // Jenis kelamin
   String? _selectedBloodGroup; // Menyimpan golongan darah
   DateTime? _selectedDate; // Menyimpan tanggal lahir
+  File? _image; // Variabel untuk menyimpan gambar yang dipilih
 
   final List<String> bloodTypes = [
     'A',
@@ -34,6 +37,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   final List<String> genders = ['Laki-laki', 'Perempuan'];
 
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _image = File(image.path); // Simpan gambar yang dipilih
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +56,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFE53935), Color(0xFFFF8A80)],
+            colors: [Color.fromARGB(255, 255, 4, 0), Color.fromARGB(255, 255, 21, 0)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -55,6 +68,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Tombol pemilihan gambar
+                Center(
+                  child: GestureDetector(
+                    onTap: _pickImage,
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundImage: _image != null ? FileImage(_image!) : null,
+                      child: _image == null
+                          ? Icon(Icons.camera_alt, size: 40, color: Colors.grey)
+                          : null,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
                 _buildTextFormField(controller: _nameController, label: 'Nama'),
                 SizedBox(height: 16),
                 _buildTextFormField(
@@ -89,7 +116,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   value: _selectedBloodGroup,
-                  decoration: InputDecoration(labelText: 'Golongan Darah'),
+                  decoration: InputDecoration(labelText: 'Golongan Darah', labelStyle: TextStyle(color: Colors.white)),
                   items: bloodTypes.map((String bloodType) {
                     return DropdownMenuItem<String>(
                       value: bloodType,
@@ -111,7 +138,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   value: _selectedGender,
-                  decoration: InputDecoration(labelText: 'Jenis Kelamin'),
+                  decoration: InputDecoration(labelText: 'Jenis Kelamin', labelStyle: TextStyle(color: Colors.white)),
                   items: genders.map((String gender) {
                     return DropdownMenuItem<String>(
                       value: gender,
@@ -138,7 +165,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 SizedBox(height: 16),
                 TextButton(
                   onPressed: () async {
-                    // Pilih tanggal lahir
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
                       initialDate: _selectedDate ?? DateTime.now(),
@@ -163,12 +189,23 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // Proses registrasi
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Registrasi Berhasil')),
                         );
 
-                        // Arahkan ke WelcomeScreen setelah registrasi berhasil
+                        // Menambahkan pengguna baru ke map pengguna
+                        WelcomeScreen.users[_emailController.text.toLowerCase()] = {
+                          "password": _passwordController.text,
+                          "userName": _nameController.text,
+                          "userBloodGroup": _selectedBloodGroup,
+                          "userGender": _selectedGender,
+                          "userJob": _jobController.text,
+                          "userBirthDate": _selectedDate,
+                          "userAddress": _addressController.text,
+                          "userKtpNumber": _ktpNumberController.text,
+                          "userImagePath": _image?.path ?? '',
+                        };
+
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -176,6 +213,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               userName: _nameController.text,
                               isRegistered: true,
                               registeredBloodGroup: _selectedBloodGroup,
+                              userEmail: _emailController.text,
+                              userPassword: _passwordController.text,
+                              userGender: _selectedGender,
+                              userJob: _jobController.text,
+                              userBirthDate: _selectedDate,
+                              userAddress: _addressController.text,
+                              userKtpNumber: _ktpNumberController.text,
+                              userImagePath: _image?.path ?? '', // Pass the image path here
                             ),
                           ),
                         );
@@ -187,10 +232,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         );
                       }
                     },
-                    child: Text('Daftar'),
+                    child: Text('Daftar', style: TextStyle(fontSize: 18, color: Colors.red)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
+                      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                      foregroundColor: const Color.fromARGB(255, 255, 255, 255),
                       minimumSize: Size(180, 50),
                       padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                       shape: RoundedRectangleBorder(
